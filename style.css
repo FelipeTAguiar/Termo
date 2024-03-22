@@ -1,0 +1,133 @@
+body{
+    margin: 0px;
+    padding: 0px;
+    background-color: #6E5C62;
+    font-family: 'Mitr';
+}
+
+.cabecalho {
+    display: flex;
+    justify-content:space-around;    
+    margin: 2px;
+    align-items: center;
+    width: 99%;
+}
+
+.titulo {
+    color: white;
+}
+
+.botao {
+    font-size: 18px;
+    height: 28px;
+    width: 28px;
+    margin: 0px 5px;
+    padding: 5px;
+    box-sizing: border-box;
+    background-color: #6E5C62;
+    border: 2px solid #B7AEB4;
+    border-radius: 5px;
+    color: #B7AEB4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cabecalho_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.principal {
+    text-align: center;
+    margin-top: 40px;
+    width: 97%;
+}
+
+.lista_letras {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+    text-align: center;
+    font-weight: 600 ;
+    margin: 0px;
+}
+
+.letras {
+    background-color: #312A2C;
+    font-size: 40px;
+    color: white;
+    margin: 2px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.letra-certa {
+    background-color: #3AA394;
+}
+
+.letra-parcial {
+    background-color: #D3AD69;
+}
+
+.letra-nao-enviada {
+    border: solid 5px #4C4347;
+    background-color: #6E5C62;
+}
+
+.letra-vazia {
+    background-color: #615458;
+}
+
+.teclado-container {
+    margin-top: 30px;
+}
+
+.lista-tecla {
+    display: flex;
+    justify-content: center;
+    list-style-type: none;
+    margin: 2px;
+}
+
+.tecla {
+    background-color: #4C4347;
+    border-radius: 5px;
+    color: white;
+    box-sizing: border-box;
+    width: 60px;
+    height: 55px;
+    margin: 2px 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: 500;
+}
+
+.primeira-lista {
+    margin-right: 80px
+}
+
+.segunda-lista {
+    margin-left: 80px;
+}
+
+.terceira-lista {
+    margin-left: 80px;
+}
+
+.enter {
+    width: 210px;
+    margin-left: 20px;
+}
+
+.backspace {
+    width: 100px;
+}
