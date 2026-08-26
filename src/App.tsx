@@ -185,6 +185,22 @@ export default function App() {
 
   return (
     <main className="app-shell">
+      <aside className="corner-panel left-panel" aria-label="Distribuicao de tentativas">
+        <section className="distribution">
+          <h2>Distribuicao</h2>
+          {stats.distribution.map((count, index) => (
+            <div className="bar-row" key={index}>
+              <span>{index + 1}</span>
+              <div className="bar-track">
+                <div className="bar-fill" style={{ width: `${Math.max(10, (count / maxDistribution) * 100)}%` }}>
+                  {count}
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      </aside>
+
       <section className="game-panel" aria-label="Jogo de palavras diario">
         <header className="topbar">
           <div>
@@ -256,7 +272,7 @@ export default function App() {
         </div>
       </section>
 
-      <aside className="side-panel" aria-label="Estatisticas">
+      <aside className="corner-panel right-panel" aria-label="Estatisticas">
         <div className="daily-card">
           <span className="mini-label">Proxima palavra</span>
           <strong>{getNextMidnightLabel()}</strong>
@@ -279,20 +295,6 @@ export default function App() {
             <strong>{stats.bestStreak}</strong>
             <span>recorde</span>
           </div>
-        </section>
-
-        <section className="distribution" aria-label="Distribuicao de tentativas">
-          <h2>Distribuicao</h2>
-          {stats.distribution.map((count, index) => (
-            <div className="bar-row" key={index}>
-              <span>{index + 1}</span>
-              <div className="bar-track">
-                <div className="bar-fill" style={{ width: `${Math.max(10, (count / maxDistribution) * 100)}%` }}>
-                  {count}
-                </div>
-              </div>
-            </div>
-          ))}
         </section>
 
         <button className="share-button" type="button" disabled={!hasFinished} onClick={shareResult}>

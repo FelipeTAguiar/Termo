@@ -1,7 +1,7 @@
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(320px, 620px) minmax(260px, 340px);
-  gap: 28px;
+  grid-template-columns: minmax(220px, 1fr) minmax(340px, 620px) minmax(220px, 1fr);
+  gap: 32px;
   align-items: start;
   min-height: 100vh;
   padding: 32px;
@@ -12,8 +12,28 @@
 }
 
 .game-panel,
-.side-panel {
+.corner-panel {
   width: 100%;
+}
+
+.game-panel {
+  justify-self: center;
+}
+
+.corner-panel {
+  display: grid;
+  gap: 18px;
+  position: sticky;
+  top: 32px;
+  max-width: 340px;
+}
+
+.left-panel {
+  justify-self: start;
+}
+
+.right-panel {
+  justify-self: end;
 }
 
 .topbar {
@@ -183,13 +203,6 @@ h2 {
   background: #343e4a;
 }
 
-.side-panel {
-  display: grid;
-  gap: 18px;
-  position: sticky;
-  top: 32px;
-}
-
 .daily-card,
 .stats-grid,
 .distribution {
@@ -294,8 +307,26 @@ h2 {
     padding: 20px 14px 28px;
   }
 
-  .side-panel {
+  .corner-panel,
+  .game-panel {
+    justify-self: center;
+    max-width: 620px;
+  }
+
+  .corner-panel {
     position: static;
+  }
+
+  .left-panel {
+    order: 2;
+  }
+
+  .game-panel {
+    order: 1;
+  }
+
+  .right-panel {
+    order: 3;
   }
 }
 
