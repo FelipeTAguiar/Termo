@@ -9,7 +9,7 @@ import {
   type GameStatus,
   type LetterStatus,
 } from "./game";
-import { getDailyAnswer, MAX_ATTEMPTS, VALID_WORDS, WORD_LENGTH } from "./words";
+import { getDailyAnswer, MAX_ATTEMPTS, WORD_LENGTH } from "./words";
 import { loadGame, loadStats, recordResult, saveGame, saveStats, type Stats } from "./storage";
 
 const KEYS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
@@ -78,8 +78,8 @@ export default function App() {
       return;
     }
 
-    if (!VALID_WORDS.has(normalizedGuess)) {
-      setMessage("Ainda nao conheco essa palavra.");
+    if (!/^[A-Z]{5}$/.test(normalizedGuess)) {
+      setMessage("Use apenas letras.");
       return;
     }
 
