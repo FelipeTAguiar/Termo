@@ -100,6 +100,7 @@ h2 {
   display: grid;
   place-items: center;
   aspect-ratio: 1;
+  padding: 0;
   border: 2px solid rgba(255, 248, 236, 0.2);
   border-radius: 8px;
   color: #fff8ec;
@@ -108,15 +109,31 @@ h2 {
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
+  cursor: default;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
-    background 160ms ease;
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .tile.filled {
   border-color: rgba(247, 241, 232, 0.58);
   transform: scale(1.02);
+}
+
+.tile.selectable {
+  cursor: pointer;
+}
+
+.tile.selectable:hover,
+.tile.selectable:focus-visible {
+  border-color: rgba(255, 248, 236, 0.78);
+}
+
+.tile.selected {
+  border-color: #e7c46b;
+  box-shadow: 0 0 0 3px rgba(231, 196, 107, 0.28);
 }
 
 .tile.correct {

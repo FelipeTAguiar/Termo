@@ -23,15 +23,23 @@ const STATUS_LABEL: Record<LetterStatus, string> = {
 function createEmptyRows(guesses: string[], currentGuess: string) {
   return Array.from({ length: MAX_ATTEMPTS }, (_, rowIndex) => {
     if (rowIndex < guesses.length) {
-      return guesses[rowIndex].padEnd(WORD_LENGTH, " ").split("");
+      return getGuessSlots(guesses[rowIndex]);
     }
 
     if (rowIndex === guesses.length) {
-      return currentGuess.padEnd(WORD_LENGTH, " ").split("");
+      return getGuessSlots(currentGuess);
     }
 
     return Array.from({ length: WORD_LENGTH }, () => " ");
   });
+}
+
+function getGuessSlots(guess: string) {
+  return guess.padEnd(WORD_LENGTH, " ").slice(0, WORD_LENGTH).split("");
+}
+
+function slotsToGuess(slots: string[]) {
+  return slots.join("").replace(/\s+$/g, "");
 }
 
 function getNextMidnightLabel() {
@@ -56,6 +64,7 @@ export default function App() {
   const [message, setMessage] = useState("Boa sorte na palavra de hoje.");
   const [stats, setStats] = useState<Stats>(() => loadStats());
   const [copied, setCopied] = useState(false);
+  const [selectedColumn, setSelectedColumn] = useState(0);
 
   const keyboardStatus = useMemo(() => {
     return guesses.reduce<Record<string, LetterStatus>>((current, guess) => {
@@ -71,10 +80,12 @@ export default function App() {
       return;
     }
 
-    const normalizedGuess = normalizeWord(currentGuess);
+    const currentLetters = getGuessSlots(currentGuess);
+    const normalizedGuess = normalizeWord(currentLetters.join(""));
 
-    if (normalizedGuess.length < WORD_LENGTH) {
-      setMessage("Digite uma palavra com 5 letras.");
+    if (currentLetters.some((letter) => !letter.trim())) {
+      setMessage("Preencha os 5 quadros antes de enviar.");
+      setSelectedColumn(currentLetters.findIndex((letter) => !letter.trim()));
       return;
     }
 
@@ -93,6 +104,7 @@ export default function App() {
 
     setGuesses(nextGuesses);
     setCurrentGuess("");
+    setSelectedColumn(0);
     setStatus(nextStatus);
     saveGame({ puzzleId, guesses: nextGuesses, status: nextStatus });
 
@@ -117,18 +129,33 @@ export default function App() {
       }
 
       if (key === "Backspace") {
-        setCurrentGuess((guess) => guess.slice(0, -1));
+        setCurrentGuess((guess) => {
+          const letters = getGuessSlots(guess);
+          const shouldMoveBack = !letters[selectedColumn].trim() && selectedColumn > 0;
+          const targetColumn = shouldMoveBack ? selectedColumn - 1 : selectedColumn;
+
+          letters[targetColumn] = " ";
+
+          if (shouldMoveBack) {
+            setSelectedColumn(targetColumn);
+          }
+
+          return slotsToGuess(letters);
+        });
         return;
       }
 
       const normalized = normalizeWord(key);
       if (/^[A-Z]$/.test(normalized)) {
-        setCurrentGuess((guess) =>
-          guess.length < WORD_LENGTH ? `${guess}${normalized}` : guess,
-        );
+        setCurrentGuess((guess) => {
+          const letters = getGuessSlots(guess);
+          letters[selectedColumn] = normalized;
+          return slotsToGuess(letters);
+        });
+        setSelectedColumn((column) => Math.min(WORD_LENGTH - 1, column + 1));
       }
     },
-    [commitGuess, status],
+    [commitGuess, selectedColumn, status],
   );
 
   useEffect(() => {
@@ -225,13 +252,22 @@ export default function App() {
                       : "vazio";
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       aria-label={label}
-                      className={`tile ${statusClass ?? ""} ${letter.trim() ? "filled" : ""}`}
+                      className={`tile ${statusClass ?? ""} ${letter.trim() ? "filled" : ""} ${
+                        rowIndex === guesses.length && status === "playing" ? "selectable" : ""
+                      } ${rowIndex === guesses.length && selectedColumn === columnIndex && status === "playing" ? "selected" : ""}`}
                       key={`${rowIndex}-${columnIndex}`}
+                      onClick={() => {
+                        if (rowIndex === guesses.length && status === "playing") {
+                          setSelectedColumn(columnIndex);
+                        }
+                      }}
+                      tabIndex={rowIndex === guesses.length && status === "playing" ? 0 : -1}
                     >
                       {letter}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
