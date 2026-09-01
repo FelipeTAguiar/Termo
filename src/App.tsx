@@ -65,6 +65,7 @@ export default function App() {
   const [stats, setStats] = useState<Stats>(() => loadStats());
   const [copied, setCopied] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState(0);
+  const [isRulesOpen, setIsRulesOpen] = useState(false);
 
   const keyboardStatus = useMemo(() => {
     return guesses.reduce<Record<string, LetterStatus>>((current, guess) => {
@@ -165,7 +166,16 @@ export default function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isRulesOpen) {
+        setIsRulesOpen(false);
+        return;
+      }
+
       if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
+      if (isRulesOpen) {
         return;
       }
 
@@ -177,7 +187,7 @@ export default function App() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [pressKey]);
+  }, [isRulesOpen, pressKey]);
 
   useEffect(() => {
     if (!hasFinished) {
@@ -239,7 +249,12 @@ export default function App() {
             <p className="eyebrow">Desafio diario #{dayIndex}</p>
             <h1>Jogo de Palavras</h1>
           </div>
-          <div className="status-pill">{hasFinished ? "Finalizado" : "Em jogo"}</div>
+          <div className="topbar-actions">
+            <button className="rules-button" type="button" onClick={() => setIsRulesOpen(true)}>
+              Regras
+            </button>
+            <div className="status-pill">{hasFinished ? "Finalizado" : "Em jogo"}</div>
+          </div>
         </header>
 
         <div className="board" aria-label="Tabuleiro">
@@ -342,6 +357,44 @@ export default function App() {
           {copied ? "Copiado" : "Compartilhar resultado"}
         </button>
       </aside>
+
+      {isRulesOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setIsRulesOpen(false)}>
+          <section
+            aria-labelledby="rules-title"
+            aria-modal="true"
+            className="rules-modal"
+            role="dialog"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="modal-header">
+              <h2 id="rules-title">Regras</h2>
+              <button className="modal-close" type="button" aria-label="Fechar regras" onClick={() => setIsRulesOpen(false)}>
+                X
+              </button>
+            </header>
+
+            <p className="rules-copy">
+              Descubra a palavra do dia em ate {MAX_ATTEMPTS} tentativas. Cada tentativa precisa ter {WORD_LENGTH} letras.
+            </p>
+
+            <div className="rules-list">
+              <div className="rule-row">
+                <span className="rule-sample correct">A</span>
+                <span>Verde: letra certa no lugar certo.</span>
+              </div>
+              <div className="rule-row">
+                <span className="rule-sample present">E</span>
+                <span>Amarela: letra existe, mas esta em outro lugar.</span>
+              </div>
+              <div className="rule-row">
+                <span className="rule-sample absent">R</span>
+                <span>Cinza: letra nao existe na palavra.</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
