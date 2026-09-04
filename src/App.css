@@ -48,6 +48,8 @@
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -89,12 +91,11 @@ h2 {
   font-weight: 800;
 }
 
+.mode-button,
 .rules-button {
   border: 1px solid rgba(255, 248, 236, 0.2);
   border-radius: 999px;
   padding: 8px 12px;
-  color: #101820;
-  background: #e7c46b;
   cursor: pointer;
   font-size: 0.86rem;
   font-weight: 900;
@@ -103,9 +104,33 @@ h2 {
     background 140ms ease;
 }
 
+.mode-button {
+  color: #f7f1e8;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mode-button.primary,
+.rules-button {
+  color: #101820;
+  background: #e7c46b;
+}
+
+.mode-button:hover,
+.mode-button:focus-visible,
 .rules-button:hover,
 .rules-button:focus-visible {
   transform: translateY(-1px);
+}
+
+.mode-button:hover,
+.mode-button:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mode-button.primary:hover,
+.mode-button.primary:focus-visible,
+.rules-button:hover,
+.rules-button:focus-visible {
   background: #f2d98f;
 }
 

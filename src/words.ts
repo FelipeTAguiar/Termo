@@ -125,3 +125,17 @@ export function getDailyAnswer(dayIndex: number) {
   const normalizedIndex = ((dayIndex % ANSWERS.length) + ANSWERS.length) % ANSWERS.length;
   return ANSWERS[normalizedIndex];
 }
+
+export function getRandomAnswer(exceptWord?: string) {
+  if (ANSWERS.length === 1) {
+    return ANSWERS[0];
+  }
+
+  let answer = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
+
+  while (exceptWord && answer === exceptWord) {
+    answer = ANSWERS[Math.floor(Math.random() * ANSWERS.length)];
+  }
+
+  return answer;
+}

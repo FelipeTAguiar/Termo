@@ -9,10 +9,11 @@ import {
   type GameStatus,
   type LetterStatus,
 } from "./game";
-import { getDailyAnswer, MAX_ATTEMPTS, VALID_WORDS, WORD_LENGTH } from "./words";
+import { getDailyAnswer, getRandomAnswer, MAX_ATTEMPTS, VALID_WORDS, WORD_LENGTH } from "./words";
 import { loadGame, loadStats, recordResult, saveGame, saveStats, type Stats } from "./storage";
 
 const KEYS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+type GameMode = "daily" | "training";
 
 const STATUS_LABEL: Record<LetterStatus, string> = {
   correct: "certa",
@@ -55,9 +56,12 @@ function getNextMidnightLabel() {
 
 export default function App() {
   const dayIndex = getDayIndex();
-  const puzzleId = getPuzzleId();
-  const answer = useMemo(() => getDailyAnswer(dayIndex), [dayIndex]);
-  const storedGame = useMemo(() => loadGame(puzzleId), [puzzleId]);
+  const dailyPuzzleId = getPuzzleId();
+  const dailyAnswer = useMemo(() => getDailyAnswer(dayIndex), [dayIndex]);
+  const storedGame = useMemo(() => loadGame(dailyPuzzleId), [dailyPuzzleId]);
+  const [gameMode, setGameMode] = useState<GameMode>("daily");
+  const [trainingAnswer, setTrainingAnswer] = useState(() => getRandomAnswer(dailyAnswer));
+  const [trainingPuzzleId, setTrainingPuzzleId] = useState(() => `treino-${Date.now()}`);
   const [guesses, setGuesses] = useState<string[]>(storedGame?.guesses ?? []);
   const [currentGuess, setCurrentGuess] = useState("");
   const [status, setStatus] = useState<GameStatus>(storedGame?.status ?? "playing");
@@ -66,6 +70,9 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [selectedColumn, setSelectedColumn] = useState(0);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const answer = gameMode === "daily" ? dailyAnswer : trainingAnswer;
+  const puzzleId = gameMode === "daily" ? dailyPuzzleId : trainingPuzzleId;
+  const isTraining = gameMode === "training";
 
   const keyboardStatus = useMemo(() => {
     return guesses.reduce<Record<string, LetterStatus>>((current, guess) => {
@@ -112,7 +119,10 @@ export default function App() {
     setCurrentGuess("");
     setSelectedColumn(0);
     setStatus(nextStatus);
-    saveGame({ puzzleId, guesses: nextGuesses, status: nextStatus });
+
+    if (gameMode === "daily") {
+      saveGame({ puzzleId, guesses: nextGuesses, status: nextStatus });
+    }
 
     if (nextStatus === "won") {
       setMessage(`Mandou bem. Voce resolveu em ${nextGuesses.length}/6.`);
@@ -121,7 +131,7 @@ export default function App() {
     } else {
       setMessage("Continue testando.");
     }
-  }, [answer, currentGuess, guesses, puzzleId, status]);
+  }, [answer, currentGuess, gameMode, guesses, puzzleId, status]);
 
   const pressKey = useCallback(
     (key: string) => {
@@ -190,7 +200,7 @@ export default function App() {
   }, [isRulesOpen, pressKey]);
 
   useEffect(() => {
-    if (!hasFinished) {
+    if (!hasFinished || gameMode !== "daily") {
       return;
     }
 
@@ -199,7 +209,35 @@ export default function App() {
       setStats(nextStats);
       saveStats(nextStats);
     }
-  }, [guesses.length, hasFinished, puzzleId, stats, status]);
+  }, [gameMode, guesses.length, hasFinished, puzzleId, stats, status]);
+
+  function resetBoard(nextMode: GameMode, nextAnswer: string, nextPuzzleId: string, nextMessage: string) {
+    setGameMode(nextMode);
+    setTrainingAnswer(nextAnswer);
+    setTrainingPuzzleId(nextPuzzleId);
+    setGuesses([]);
+    setCurrentGuess("");
+    setSelectedColumn(0);
+    setStatus("playing");
+    setCopied(false);
+    setMessage(nextMessage);
+  }
+
+  function startDailyGame() {
+    const latestStoredGame = loadGame(dailyPuzzleId);
+
+    setGameMode("daily");
+    setGuesses(latestStoredGame?.guesses ?? []);
+    setCurrentGuess("");
+    setSelectedColumn(0);
+    setStatus(latestStoredGame?.status ?? "playing");
+    setCopied(false);
+    setMessage("Boa sorte na palavra de hoje.");
+  }
+
+  function startTrainingGame() {
+    resetBoard("training", getRandomAnswer(answer), `treino-${Date.now()}`, "Modo treino: tente descobrir a palavra aleatoria.");
+  }
 
   async function shareResult() {
     const blocks = guesses
@@ -214,7 +252,8 @@ export default function App() {
       )
       .join("\n");
     const score = status === "won" ? `${guesses.length}/${MAX_ATTEMPTS}` : `X/${MAX_ATTEMPTS}`;
-    const text = `Jogo de Palavras #${dayIndex} ${score}\n${blocks}`;
+    const label = isTraining ? "Treino" : `#${dayIndex}`;
+    const text = `Jogo de Palavras ${label} ${score}\n${blocks}`;
 
     await navigator.clipboard.writeText(text);
     setCopied(true);
@@ -246,10 +285,18 @@ export default function App() {
       <section className="game-panel" aria-label="Jogo de palavras diario">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Desafio diario #{dayIndex}</p>
+            <p className="eyebrow">{isTraining ? "Modo treino" : `Desafio diario #${dayIndex}`}</p>
             <h1>Jogo de Palavras</h1>
           </div>
           <div className="topbar-actions">
+            {isTraining && (
+              <button className="mode-button" type="button" onClick={startDailyGame}>
+                Diario
+              </button>
+            )}
+            <button className="mode-button primary" type="button" onClick={startTrainingGame}>
+              {isTraining ? "Novo treino" : "Treino"}
+            </button>
             <button className="rules-button" type="button" onClick={() => setIsRulesOpen(true)}>
               Regras
             </button>
